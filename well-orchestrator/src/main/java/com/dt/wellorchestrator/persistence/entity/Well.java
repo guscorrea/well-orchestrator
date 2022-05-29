@@ -1,5 +1,6 @@
 package com.dt.wellorchestrator.persistence.entity;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.datastax.driver.mapping.annotations.Column;
@@ -20,5 +21,11 @@ public class Well {
 
 	@Column
 	private String name;
+
+	@Column
+	private String wellInfo;
+
+	@Column
+	private LocalDateTime creationDateTime;
 
 }

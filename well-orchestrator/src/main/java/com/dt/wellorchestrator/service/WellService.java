@@ -1,5 +1,6 @@
 package com.dt.wellorchestrator.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,7 +19,7 @@ public class WellService {
 
 	public Well saveWell(WellRequest wellRequest) {
 		System.out.println("Creating a well with name " + wellRequest.getName());
-		Well well = new Well(UUID.randomUUID(), wellRequest.getName());
+		Well well = new Well(UUID.randomUUID(), wellRequest.getName(), wellRequest.getWellInfo(), LocalDateTime.now());
 		return wellRepository.save(well);
 	}
 

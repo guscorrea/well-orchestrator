@@ -3,22 +3,19 @@ package com.dt.wellorchestrator.config;
 import static com.datastax.driver.core.schemabuilder.SchemaBuilder.createKeyspace;
 import static com.datastax.driver.mapping.NamingConventions.LOWER_CAMEL_CASE;
 import static com.datastax.driver.mapping.NamingConventions.LOWER_SNAKE_CASE;
-import static org.apache.commons.lang3.StringUtils.normalizeSpace;
-import static org.apache.commons.lang3.StringUtils.split;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.extras.codecs.jdk8.LocalDateTimeCodec;
 import com.datastax.driver.mapping.DefaultNamingStrategy;
 import com.datastax.driver.mapping.DefaultPropertyMapper;
 import com.datastax.driver.mapping.MappingConfiguration;
@@ -30,11 +27,13 @@ public class ScyllaConfig {
 
 	@Bean
 	public Cluster cluster() {
-		return Cluster.builder().addContactPointsWithPorts(
-				new InetSocketAddress("127.0.0.1", 9042),
-				new InetSocketAddress("127.0.0.1", 9043),
-				new InetSocketAddress("127.0.0.1", 9044))
+		Cluster cluster = Cluster.builder().addContactPointsWithPorts(
+						new InetSocketAddress("127.0.0.1", 9042),
+						new InetSocketAddress("127.0.0.1", 9043),
+						new InetSocketAddress("127.0.0.1", 9044))
 				.build();
+		cluster.getConfiguration().getCodecRegistry().register(LocalDateTimeCodec.instance);
+		return cluster;
 	}
 
 	@Bean
@@ -58,8 +57,6 @@ public class ScyllaConfig {
 		replication.put("DC1", 3);
 		session.execute(createKeyspace(keyspace).ifNotExists().with().replication(replication));
 		session.execute("USE " + keyspace);
-		String[] statements = split(IOUtils.toString(getClass().getResourceAsStream("/cql/setup.cql")), ";");
-		Arrays.stream(statements).map(statement -> normalizeSpace(statement) + ";").forEach(session::execute);
 	}
 
 }

@@ -1,5 +1,8 @@
 package com.dt.wellorchestrator.persistence;
 
+import static com.datastax.driver.core.DataType.text;
+import static com.datastax.driver.core.DataType.timestamp;
+import static com.datastax.driver.core.DataType.uuid;
 import static com.datastax.driver.core.querybuilder.QueryBuilder.select;
 
 import java.util.List;
@@ -9,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.schemabuilder.SchemaBuilder;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import com.dt.wellorchestrator.persistence.entity.Well;
@@ -23,8 +27,19 @@ public class WellRepository {
 	private Session session;
 
 	public WellRepository(MappingManager mappingManager) {
+		createTable(mappingManager.getSession());
 		this.mapper = mappingManager.mapper(Well.class);
 		this.session = mappingManager.getSession();
+	}
+
+	private void createTable(Session session) {
+		session.execute(
+				SchemaBuilder.createTable(TABLE)
+						.ifNotExists()
+						.addPartitionKey("well_id", uuid())
+						.addColumn("name", text())
+						.addColumn("well_info", text())
+						.addColumn("creation_date_time", timestamp()));
 	}
 
 	public List<Well> findAll() {

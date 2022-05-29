@@ -10,4 +10,6 @@ public class WellRequest {
 	@NotBlank
 	String name;
 
+	String wellInfo;
+
 }
