@@ -47,6 +47,10 @@ public class WellRepository {
 		return mapper.map(result).all();
 	}
 
+	public Well findById(UUID id) {
+		return mapper.get(id);
+	}
+
 	public void delete(UUID id) {
 		mapper.delete(id);
 	}
