@@ -51,13 +51,13 @@ public class WellRepository {
 		return mapper.get(id);
 	}
 
-	public void delete(UUID id) {
-		mapper.delete(id);
-	}
-
 	public Well save(Well well) {
 		mapper.save(well);
 		return well;
+	}
+
+	public void delete(UUID id) {
+		mapper.delete(id);
 	}
 
 }

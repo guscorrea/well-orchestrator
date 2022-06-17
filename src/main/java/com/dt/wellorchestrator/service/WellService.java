@@ -47,4 +47,8 @@ public class WellService {
 		return wellRepository.save(well);
 	}
 
+	public void deleteWell(UUID id) {
+		wellRepository.delete(id);
+	}
+
 }
