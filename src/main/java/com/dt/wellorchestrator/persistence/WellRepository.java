@@ -1,5 +1,6 @@
 package com.dt.wellorchestrator.persistence;
 
+import static com.datastax.driver.core.DataType.map;
 import static com.datastax.driver.core.DataType.text;
 import static com.datastax.driver.core.DataType.timestamp;
 import static com.datastax.driver.core.DataType.uuid;
@@ -39,6 +40,7 @@ public class WellRepository {
 						.addPartitionKey("well_id", uuid())
 						.addColumn("name", text())
 						.addColumn("well_info", text())
+						.addColumn("components", map(uuid(), text()))
 						.addColumn("creation_date_time", timestamp()));
 	}
 

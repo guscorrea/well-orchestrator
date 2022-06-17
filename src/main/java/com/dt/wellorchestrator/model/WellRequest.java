@@ -8,8 +8,8 @@ import lombok.Data;
 public class WellRequest {
 
 	@NotBlank
-	String name;
+	private String name;
 
-	String wellInfo;
+	private String wellInfo;
 
 }

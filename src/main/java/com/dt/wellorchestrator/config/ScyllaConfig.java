@@ -15,12 +15,14 @@ import org.springframework.context.annotation.Configuration;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.extras.codecs.enums.EnumNameCodec;
 import com.datastax.driver.extras.codecs.jdk8.LocalDateTimeCodec;
 import com.datastax.driver.mapping.DefaultNamingStrategy;
 import com.datastax.driver.mapping.DefaultPropertyMapper;
 import com.datastax.driver.mapping.MappingConfiguration;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.PropertyMapper;
+import com.dt.wellorchestrator.model.ComponentType;
 
 @Configuration
 public class ScyllaConfig {
@@ -33,6 +35,7 @@ public class ScyllaConfig {
 						new InetSocketAddress("127.0.0.1", 9044))
 				.build();
 		cluster.getConfiguration().getCodecRegistry().register(LocalDateTimeCodec.instance);
+		cluster.getConfiguration().getCodecRegistry().register(new EnumNameCodec(ComponentType.class));
 		return cluster;
 	}
 
