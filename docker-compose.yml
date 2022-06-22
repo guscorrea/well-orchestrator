@@ -41,6 +41,18 @@ services:
     networks:
       web:
 
+  mosquitto:
+    container_name: mosquitto-broker
+    image: eclipse-mosquitto:2.0.14
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - "./mosquitto/dtBroker.conf:/mosquitto/config/mosquitto.conf"
+      - "./mosquitto/dtPassword:/mosquitto/config/mosquitto.passwd"
+#      - "./mosquitto/data:/mosquitto/data"
+#      - "./mosquitto/log:/mosquitto/log"
+
 networks:
   web:
     driver: bridge

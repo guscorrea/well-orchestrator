@@ -43,6 +43,7 @@ public class WellService {
 			//TODO throw exception
 		}
 		System.out.println("Updating well with id " + id);
+		//TODO save components here
 		well.setName(wellRequest.getName());
 		well.setWellInfo(wellRequest.getWellInfo());
 		return wellRepository.save(well);
