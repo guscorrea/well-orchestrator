@@ -28,13 +28,9 @@ public class ComponentService {
 
 	public Well addComponent(UUID wellId, ComponentRequest componentRequest) {
 		Well well = wellService.getWell(wellId);
-		if (Objects.isNull(well)) {
-			//TODO throw exception
-		}
-
 		//TODO validate if the component exists componentRequest.getComponentId()
 		System.out.println("Adding component " + componentRequest.getComponentId() + " to well with id: " + wellId);
-		if(Objects.isNull(well.getComponents())) {
+		if (wellHasNoComponents(well)) {
 			Map<UUID, ComponentType> newComponent = new HashMap<>();
 			newComponent.put(componentRequest.getComponentId(), componentRequest.getType());
 			well.setComponents(newComponent);
@@ -49,16 +45,16 @@ public class ComponentService {
 
 	public void removeComponent(UUID wellId, UUID componentId) {
 		Well well = wellService.getWell(wellId);
-		if (Objects.isNull(well)) {
-			//TODO throw exception
-		}
-
-		if(Objects.isNull(well.getComponents())) {
+		if (wellHasNoComponents(well)) {
 			return;
 		}
 		System.out.println("Removing component " + componentId + " to well with id: " + wellId);
 		well.getComponents().remove(componentId);
 		wellRepository.save(well);
+	}
+
+	private boolean wellHasNoComponents(Well well) {
+		return Objects.isNull(well.getComponents());
 	}
 
 }

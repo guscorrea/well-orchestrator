@@ -31,7 +31,7 @@ public class WellController {
 	}
 
 	@GetMapping("/well")
-	public ResponseEntity<List<Well>> listWell() {
+	public ResponseEntity<List<Well>> listWells() {
 		List<Well> well = wellService.getAllWells();
 		return new ResponseEntity<>(well, HttpStatus.OK);
 	}

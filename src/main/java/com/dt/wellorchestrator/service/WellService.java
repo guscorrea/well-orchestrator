@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.dt.wellorchestrator.exception.WellNotFoundException;
 import com.dt.wellorchestrator.model.WellRequest;
 import com.dt.wellorchestrator.persistence.WellRepository;
 import com.dt.wellorchestrator.persistence.entity.Well;
@@ -24,7 +25,11 @@ public class WellService {
 	}
 
 	public Well getWell(UUID id) {
-		return wellRepository.findById(id);
+		Well well = wellRepository.findById(id);
+		if (Objects.isNull(well)) {
+			throw new WellNotFoundException("Well with id " + id.toString() + " not found in the database.");
+		}
+		return well;
 	}
 
 	public List<Well> getAllWells() {
@@ -33,17 +38,19 @@ public class WellService {
 
 	public Well saveWell(WellRequest wellRequest) {
 		System.out.println("Creating a well with name " + wellRequest.getName());
-		Well well = new Well(UUID.randomUUID(), wellRequest.getName(), wellRequest.getWellInfo(), new HashMap<>(), LocalDateTime.now());
+		Well well = Well.builder()
+				.wellId(UUID.randomUUID())
+				.name(wellRequest.getName())
+				.wellInfo(wellRequest.getWellInfo())
+				.components(new HashMap<>())
+				.creationDateTime(LocalDateTime.now())
+				.build();
 		return wellRepository.save(well);
 	}
 
 	public Well updateWell(UUID id, WellRequest wellRequest) {
 		Well well = getWell(id);
-		if (Objects.isNull(well)) {
-			//TODO throw exception
-		}
 		System.out.println("Updating well with id " + id);
-		//TODO save components here
 		well.setName(wellRequest.getName());
 		well.setWellInfo(wellRequest.getWellInfo());
 		return wellRepository.save(well);
