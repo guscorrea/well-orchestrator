@@ -6,53 +6,144 @@ services:
     container_name: scylla-node1
     image: scylladb/scylla:4.5.0
     restart: always
-    command: --seeds=scylla-node1,scylla-node2 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    command: --seeds=scylla-node1,scylla-node2 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0 --broadcast-rpc-address scylla-node1
     ports:
-      - 9042:9042
+      - "9042:9042"
     volumes:
       - "./scylla/scylla.yaml:/etc/scylla/scylla.yaml"
       - "./scylla/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"
     networks:
-      web:
+      - digital-twin-network
 
   scylla-node2:
     container_name: scylla-node2
     image: scylladb/scylla:4.5.0
     restart: always
-    command: --seeds=scylla-node1,scylla-node2 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    command: --seeds=scylla-node1,scylla-node2 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0 --broadcast-rpc-address scylla-node2
     ports:
-      - 9043:9042
+      - "9043:9042"
     volumes:
       - "./scylla/scylla.yaml:/etc/scylla/scylla.yaml"
       - "./scylla/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"
     networks:
-      web:
+      - digital-twin-network
 
   scylla-node3:
     container_name: scylla-node3
     image: scylladb/scylla:4.5.0
     restart: always
-    command: --seeds=scylla-node1,scylla-node2 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    command: --seeds=scylla-node1,scylla-node2 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0 --broadcast-rpc-address scylla-node3
     ports:
-      - 9044:9042
+      - "9044:9042"
     volumes:
       - "./scylla/scylla.yaml:/etc/scylla/scylla.yaml"
       - "./scylla/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"
     networks:
-      web:
+      - digital-twin-network
 
   mosquitto:
-    container_name: mosquitto-broker
+    container_name: mosquitto
     image: eclipse-mosquitto:2.0.14
     ports:
-      - 1883:1883
-      - 9001:9001
+      - "1883:1883"
+      - "9001:9001"
     volumes:
       - "./mosquitto/dtBroker.conf:/mosquitto/config/mosquitto.conf"
       - "./mosquitto/dtPassword:/mosquitto/config/mosquitto.passwd"
 #      - "./mosquitto/data:/mosquitto/data"
 #      - "./mosquitto/log:/mosquitto/log"
+    networks:
+      - digital-twin-network
+
+  well-orchestrator:
+    container_name: well-orchestrator
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: well-orchestrator:latest
+    environment:
+      - SCYLLA_NODE1_URL=scylla-node1
+      - SCYLLA_NODE2_URL=scylla-node2
+      - SCYLLA_NODE3_URL=scylla-node3
+    ports:
+      - "8082:8082"
+    depends_on:
+      - scylla-node1
+      - scylla-node2
+      - scylla-node3
+      - mosquitto
+    networks:
+      - digital-twin-network
+
+  virtual-tubing:
+    container_name: virtual-tubing
+    image: virtual-tubing:latest
+    environment:
+      - SCYLLA_NODE1_URL=scylla-node1
+      - SCYLLA_NODE2_URL=scylla-node2
+      - SCYLLA_NODE3_URL=scylla-node3
+    ports:
+      - "8085:8085"
+    depends_on:
+      - scylla-node1
+      - scylla-node2
+      - scylla-node3
+      - mosquitto
+    networks:
+      - digital-twin-network
+
+  virtual-anm:
+    container_name: virtual-anm
+    image: virtual-anm:latest
+    environment:
+      - SCYLLA_NODE1_URL=scylla-node1
+      - SCYLLA_NODE2_URL=scylla-node2
+      - SCYLLA_NODE3_URL=scylla-node3
+    ports:
+      - "8084:8084"
+    depends_on:
+      - scylla-node1
+      - scylla-node2
+      - scylla-node3
+      - mosquitto
+    networks:
+      - digital-twin-network
+
+  virtual-choke-valve:
+    container_name: virtual-choke-valve
+    image: virtual-choke-valve:latest
+    environment:
+      - SCYLLA_NODE1_URL=scylla-node1
+      - SCYLLA_NODE2_URL=scylla-node2
+      - SCYLLA_NODE3_URL=scylla-node3
+    ports:
+      - "8081:8081"
+    depends_on:
+      - scylla-node1
+      - scylla-node2
+      - scylla-node3
+      - mosquitto
+    networks:
+      - digital-twin-network
+
+  dashboard-service:
+    container_name: dashboard-service
+    image: dashboard-service:latest
+    ports:
+      - "8083:8083"
+    networks:
+      - digital-twin-network
+
+  data-provider:
+    container_name: data-provider
+    image: data-provider:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mosquitto
+    networks:
+      - digital-twin-network
 
 networks:
-  web:
+  digital-twin-network:
     driver: bridge
