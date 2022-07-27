@@ -30,31 +30,31 @@ public class WellController {
 		this.wellService = wellService;
 	}
 
-	@GetMapping("/well")
+	@GetMapping("/v1/well")
 	public ResponseEntity<List<Well>> listWells() {
 		List<Well> well = wellService.getAllWells();
 		return new ResponseEntity<>(well, HttpStatus.OK);
 	}
 
-	@GetMapping("/well/{id}")
+	@GetMapping("/v1/well/{id}")
 	public ResponseEntity<Well> getWell(@PathVariable("id") UUID id) {
 		Well well = wellService.getWell(id);
 		return new ResponseEntity<>(well, HttpStatus.OK);
 	}
 
-	@PostMapping("/well")
+	@PostMapping("/v1/well")
 	public ResponseEntity<Well> createWell(@RequestBody @Valid WellRequest wellRequest) {
 		Well well = wellService.saveWell(wellRequest);
 		return new ResponseEntity<>(well, HttpStatus.OK);
 	}
 
-	@PutMapping("/well/{id}")
+	@PutMapping("/v1/well/{id}")
 	public ResponseEntity<Well> updateWell(@PathVariable("id") UUID id, @RequestBody @Valid WellRequest wellRequest) {
 		Well updatedWell = wellService.updateWell(id, wellRequest);
 		return new ResponseEntity<>(updatedWell, HttpStatus.OK);
 	}
 
-	@DeleteMapping("/well/{id}")
+	@DeleteMapping("/v1/well/{id}")
 	public ResponseEntity<Void> deleteWell(@PathVariable("id") UUID id) {
 		wellService.deleteWell(id);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);

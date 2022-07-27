@@ -27,13 +27,13 @@ public class ComponentController {
 		this.componentService = componentService;
 	}
 
-	@PostMapping("/add-component/{wellId}")
+	@PostMapping("/v1/add-component/{wellId}")
 	public ResponseEntity<Well> addComponent(@PathVariable("wellId") UUID wellId, @RequestBody @Valid ComponentRequest componentRequest) {
 		Well updatedWell = componentService.addComponent(wellId, componentRequest);
 		return new ResponseEntity<>(updatedWell, HttpStatus.OK);
 	}
 
-	@DeleteMapping("/remove-component/well/{wellId}/component/{componentId}")
+	@DeleteMapping("/v1/remove-component/well/{wellId}/component/{componentId}")
 	public ResponseEntity<Void> removeComponent(@PathVariable("wellId") UUID wellId, @PathVariable("componentId") UUID componentId) {
 		componentService.removeComponent(wellId, componentId);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
