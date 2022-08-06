@@ -12,7 +12,9 @@ import com.dt.wellorchestrator.model.ComponentRequest;
 import com.dt.wellorchestrator.model.ComponentType;
 import com.dt.wellorchestrator.persistence.WellRepository;
 import com.dt.wellorchestrator.persistence.entity.Well;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class ComponentService {
 
@@ -29,7 +31,7 @@ public class ComponentService {
 	public Well addComponent(UUID wellId, ComponentRequest componentRequest) {
 		Well well = wellService.getWell(wellId);
 		//TODO validate if the component exists componentRequest.getComponentId()
-		System.out.println("Adding component " + componentRequest.getComponentId() + " to well with id: " + wellId);
+		log.info("Adding component {} to well with id: {}", componentRequest.getComponentId(), wellId);
 		if (wellHasNoComponents(well)) {
 			Map<UUID, ComponentType> newComponent = new HashMap<>();
 			newComponent.put(componentRequest.getComponentId(), componentRequest.getType());
@@ -48,7 +50,7 @@ public class ComponentService {
 		if (wellHasNoComponents(well)) {
 			return;
 		}
-		System.out.println("Removing component " + componentId + " to well with id: " + wellId);
+		log.info("Removing component {} from well with id: {}", wellId);
 		well.getComponents().remove(componentId);
 		wellRepository.save(well);
 	}

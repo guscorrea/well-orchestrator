@@ -13,8 +13,10 @@ import com.dt.wellorchestrator.exception.WellNotFoundException;
 import com.dt.wellorchestrator.model.WellRequest;
 import com.dt.wellorchestrator.persistence.WellRepository;
 import com.dt.wellorchestrator.persistence.entity.Well;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class WellService {
 
 	private final WellRepository wellRepository;
@@ -37,7 +39,7 @@ public class WellService {
 	}
 
 	public Well saveWell(WellRequest wellRequest) {
-		System.out.println("Creating a well with name " + wellRequest.getName());
+		log.info("Creating a well with name {}", wellRequest.getName());
 		Well well = Well.builder()
 				.wellId(UUID.randomUUID())
 				.name(wellRequest.getName())
@@ -50,7 +52,7 @@ public class WellService {
 
 	public Well updateWell(UUID id, WellRequest wellRequest) {
 		Well well = getWell(id);
-		System.out.println("Updating well with id " + id);
+		log.info("Updating well with id {}", id);
 		well.setName(wellRequest.getName());
 		well.setWellInfo(wellRequest.getWellInfo());
 		return wellRepository.save(well);

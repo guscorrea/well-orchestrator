@@ -2,6 +2,8 @@ version: "3"
 
 services:
 
+## ------------- SCYLLA DB ------------- ## ## ------------- SCYLLA DB ------------- ## ## ------------- SCYLLA DB ------------- ##
+## ------------- SCYLLA DB ------------- ## ## ------------- SCYLLA DB ------------- ## ## ------------- SCYLLA DB ------------- ##
   scylla-node1:
     container_name: scylla-node1
     image: scylladb/scylla:4.5.0
@@ -40,7 +42,11 @@ services:
       - "./scylla/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"
     networks:
       - digital-twin-network
+## ------------- SCYLLA DB ------------- ## ## ------------- SCYLLA DB ------------- ## ## ------------- SCYLLA DB ------------- ##
+## ------------- SCYLLA DB ------------- ## ## ------------- SCYLLA DB ------------- ## ## ------------- SCYLLA DB ------------- ##
 
+## ------------- MOSQUITTO ------------- ## ## ------------- MOSQUITTO ------------- ## ## ------------- MOSQUITTO ------------- ##
+## ------------- MOSQUITTO ------------- ## ## ------------- MOSQUITTO ------------- ## ## ------------- MOSQUITTO ------------- ##
   mosquitto:
     container_name: mosquitto
     image: eclipse-mosquitto:2.0.14
@@ -55,6 +61,65 @@ services:
     networks:
       - digital-twin-network
 
+## ------------- MOSQUITTO ------------- ## ## ------------- MOSQUITTO ------------- ## ## ------------- MOSQUITTO ------------- ##
+## ------------- MOSQUITTO ------------- ## ## ------------- MOSQUITTO ------------- ## ## ------------- MOSQUITTO ------------- ##
+
+## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ##
+## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ##
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+    ports:
+      - "9200:9200"
+    environment:
+      - "discovery.type=single-node"
+#    volumes:
+#      - ./elasticsearch/data:/usr/share/elasticsearch/data:rw              # Persistence data
+    networks:
+      - digital-twin-network
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.2.0
+    ports:
+      - "25826:25826"
+      - "5044:5044"
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro                # Pipeline configuration
+    restart: on-failure
+    depends_on:
+      - elasticsearch
+    networks:
+      - digital-twin-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.2.0
+    ports:
+      - "5601:5601"
+    restart: on-failure
+    depends_on:
+      - elasticsearch
+    networks:
+      - digital-twin-network
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.2.0
+    command: filebeat -e -strict.perms=false
+    volumes:
+      - ./filebeat/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro # Configuration file
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro           # Docker logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro                       # Additional information about containers
+#      - ./filebeat/data:/usr/share/filebeat/data:rw                        # Persistence data
+    user: root                                                             # Allow access to log files and docker.sock
+    restart: on-failure
+    depends_on:
+      - logstash
+    networks:
+      - digital-twin-network
+## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ##
+## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ##
+
+## ------------- DIGITAL TWIN ------------- ## ## ------------- DIGITAL TWIN ------------- ## ## ------------- DIGITAL TWIN ------------- ##
+## ------------- DIGITAL TWIN ------------- ## ## ------------- DIGITAL TWIN ------------- ## ## ------------- DIGITAL TWIN ------------- ##
+
   well-orchestrator:
     container_name: well-orchestrator
     build:
@@ -67,6 +132,9 @@ services:
       - SCYLLA_NODE3_URL=scylla-node3
     ports:
       - "8082:8082"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     depends_on:
       - scylla-node1
       - scylla-node2
@@ -131,6 +199,9 @@ services:
     image: dashboard-service:latest
     ports:
       - "8083:8083"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     networks:
       - digital-twin-network
 
@@ -143,6 +214,9 @@ services:
       - mosquitto
     networks:
       - digital-twin-network
+
+## ------------- DIGITAL TWIN ------------- ## ## ------------- DIGITAL TWIN ------------- ## ## ------------- DIGITAL TWIN ------------- ##
+## ------------- DIGITAL TWIN ------------- ## ## ------------- DIGITAL TWIN ------------- ## ## ------------- DIGITAL TWIN ------------- ##
 
 networks:
   digital-twin-network:
