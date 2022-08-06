@@ -50,7 +50,7 @@ public class ComponentService {
 		if (wellHasNoComponents(well)) {
 			return;
 		}
-		log.info("Removing component {} from well with id: {}", wellId);
+		log.info("Removing component {} from well with id: {}", componentId, wellId);
 		well.getComponents().remove(componentId);
 		wellRepository.save(well);
 	}
