@@ -67,6 +67,7 @@ services:
 ## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ##
 ## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ##
   elasticsearch:
+    container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
     ports:
       - "9200:9200"
@@ -78,6 +79,7 @@ services:
       - digital-twin-network
 
   logstash:
+    container_name: logstash
     image: docker.elastic.co/logstash/logstash:7.2.0
     ports:
       - "25826:25826"
@@ -91,6 +93,7 @@ services:
       - digital-twin-network
 
   kibana:
+    container_name: kibana
     image: docker.elastic.co/kibana/kibana:7.2.0
     ports:
       - "5601:5601"
@@ -101,6 +104,7 @@ services:
       - digital-twin-network
 
   filebeat:
+    container_name: filebeat
     image: docker.elastic.co/beats/filebeat:7.2.0
     command: filebeat -e -strict.perms=false
     volumes:
@@ -112,6 +116,20 @@ services:
     restart: on-failure
     depends_on:
       - logstash
+    networks:
+      - digital-twin-network
+
+  metricbeat:
+    container_name: metricbeat
+    image: docker.elastic.co/beats/metricbeat:7.2.0
+    command: metricbeat -e -strict.perms=false
+    volumes:
+      - ./metricbeat/metricbeat.docker.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    user: root
+    restart: on-failure
+    depends_on:
+      - elasticsearch
     networks:
       - digital-twin-network
 ## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ## ## ------------- ELASTIC STACK ------------- ##
@@ -140,6 +158,7 @@ services:
       - scylla-node2
       - scylla-node3
       - mosquitto
+      - logstash
     networks:
       - digital-twin-network
 
@@ -152,11 +171,15 @@ services:
       - SCYLLA_NODE3_URL=scylla-node3
     ports:
       - "8085:8085"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     depends_on:
       - scylla-node1
       - scylla-node2
       - scylla-node3
       - mosquitto
+      - logstash
     networks:
       - digital-twin-network
 
@@ -169,11 +192,15 @@ services:
       - SCYLLA_NODE3_URL=scylla-node3
     ports:
       - "8084:8084"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     depends_on:
       - scylla-node1
       - scylla-node2
       - scylla-node3
       - mosquitto
+      - logstash
     networks:
       - digital-twin-network
 
@@ -186,11 +213,15 @@ services:
       - SCYLLA_NODE3_URL=scylla-node3
     ports:
       - "8081:8081"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     depends_on:
       - scylla-node1
       - scylla-node2
       - scylla-node3
       - mosquitto
+      - logstash
     networks:
       - digital-twin-network
 
@@ -202,6 +233,8 @@ services:
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
+    depends_on:
+      - logstash
     networks:
       - digital-twin-network
 
@@ -210,8 +243,12 @@ services:
     image: data-provider:latest
     ports:
       - "8080:8080"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
     depends_on:
       - mosquitto
+      - logstash
     networks:
       - digital-twin-network
 
