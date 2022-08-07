@@ -9,15 +9,12 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.dt.wellorchestrator.exception.WellNotFoundException;
-import lombok.extern.slf4j.Slf4j;
 
 @ControllerAdvice
-@Slf4j
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(WellNotFoundException.class)
 	public ResponseEntity<List<String>> handleDocumentDuplicationException(WellNotFoundException e) {
-		log.error(e.getMessage());
 		return new ResponseEntity<>(toListMessages(e.getMessage()), HttpStatus.NOT_FOUND);
 	}
 
