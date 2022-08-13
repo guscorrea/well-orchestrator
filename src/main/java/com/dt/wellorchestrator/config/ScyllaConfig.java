@@ -5,7 +5,6 @@ import static com.datastax.driver.mapping.NamingConventions.LOWER_CAMEL_CASE;
 import static com.datastax.driver.mapping.NamingConventions.LOWER_SNAKE_CASE;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +50,7 @@ public class ScyllaConfig {
 		return new MappingManager(session, configuration);
 	}
 
-	private void setupKeyspace(Session session, String keyspace) throws IOException {
+	private void setupKeyspace(Session session, String keyspace) {
 		final Map<String, Object> replication = new HashMap<>();
 		replication.put("class", "NetworkTopologyStrategy");
 		replication.put("DC1", 3);
