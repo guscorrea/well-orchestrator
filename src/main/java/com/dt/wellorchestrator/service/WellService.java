@@ -29,7 +29,7 @@ public class WellService {
 	public Well getWell(UUID id) {
 		Well well = wellRepository.findById(id);
 		if (Objects.isNull(well)) {
-			log.error("Well with id {] not found in the DB.", id);
+			log.error("Well with id {} not found in the DB.", id);
 			throw new WellNotFoundException("Well with id " + id.toString() + " not found in the database.");
 		}
 		return well;

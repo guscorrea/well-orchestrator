@@ -144,7 +144,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: well-orchestrator:latest
-    restart: unless-stopped
+    #restart: unless-stopped
     environment:
       - SCYLLA_NODE1_URL=scylla-node1
       - SCYLLA_NODE2_URL=scylla-node2
@@ -160,13 +160,15 @@ services:
       - scylla-node3
       - mosquitto
       - logstash
+      - filebeat
+      - metricbeat
     networks:
       - digital-twin-network
 
   virtual-tubing:
     container_name: virtual-tubing
     image: virtual-tubing:latest
-    restart: unless-stopped
+    #restart: unless-stopped
     environment:
       - SCYLLA_NODE1_URL=scylla-node1
       - SCYLLA_NODE2_URL=scylla-node2
@@ -182,13 +184,15 @@ services:
       - scylla-node3
       - mosquitto
       - logstash
+      - filebeat
+      - metricbeat
     networks:
       - digital-twin-network
 
   virtual-anm:
     container_name: virtual-anm
     image: virtual-anm:latest
-    restart: unless-stopped
+    #restart: unless-stopped
     environment:
       - SCYLLA_NODE1_URL=scylla-node1
       - SCYLLA_NODE2_URL=scylla-node2
@@ -204,13 +208,15 @@ services:
       - scylla-node3
       - mosquitto
       - logstash
+      - metricbeat
+      - filebeat
     networks:
       - digital-twin-network
 
   virtual-choke-valve:
     container_name: virtual-choke-valve
     image: virtual-choke-valve:latest
-    restart: unless-stopped
+    #restart: unless-stopped
     environment:
       - SCYLLA_NODE1_URL=scylla-node1
       - SCYLLA_NODE2_URL=scylla-node2
@@ -226,6 +232,8 @@ services:
       - scylla-node3
       - mosquitto
       - logstash
+      - filebeat
+      - metricbeat
     networks:
       - digital-twin-network
 

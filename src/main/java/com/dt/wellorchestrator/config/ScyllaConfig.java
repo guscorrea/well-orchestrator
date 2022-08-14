@@ -36,7 +36,7 @@ public class ScyllaConfig {
 	}
 
 	@Bean
-	public Session session(Cluster cluster, @Value("${scylla.keyspace}") String keyspace) throws IOException {
+	public Session session(Cluster cluster, @Value("${scylla.keyspace}") String keyspace) {
 		final Session session = cluster.connect();
 		setupKeyspace(session, keyspace);
 		return session;
