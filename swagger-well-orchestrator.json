@@ -1,0 +1,438 @@
+{
+	"openapi": "3.0.1",
+	"info": {
+		"title": "Well Orchestrator",
+		"description": "The well-orchestrator microservice is mostly responsible for managing a Well resource and its relationships with other components. A physical representation of a Well resource would be equivalent to the entire Oil Well itself, containing general data about the plant and the discrete DTs associated with it.",
+		"version": "1.0.0"
+	},
+	"servers": [
+		{
+			"url": "http://localhost:8082",
+			"description": "Local Docker deployment URL"
+		}
+	],
+	"paths": {
+		"/v1/well/{id}": {
+			"get": {
+				"tags": [
+					"Well"
+				],
+				"summary": "Retrieves a well resource.",
+				"description": "Retrieves a well resource with a given UUID",
+				"operationId": "getWell",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The well was retrieved.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Well"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "The request failed validation.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"example": "Invalid UUID string"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "The well was not found in the DB.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"example": "Well with id c5f2f64c-b02d-4635-8a34-c3d4cc2d955b not found in the database."
+								}
+							}
+						}
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Well"
+				],
+				"summary": "Updates a well resource",
+				"description": "Sends a put request, validates input data, checks if the current resource exists, and saves the updated resource into the Scylla database.",
+				"operationId": "updateWell",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/WellRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Well resource was updated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Well"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "The request failed validation.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"example": "Field name: must not be null"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "The well was not found in the DB.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"example": "Well with id c5f2f64c-b02d-4635-8a34-c3d4cc2d955b not found in the database."
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected error occurred",
+						"content": {
+							"application/json": {}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Well"
+				],
+				"summary": "Deletes a well resource",
+				"description": "Deletes a well resource with given UUID.",
+				"operationId": "deleteWell",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "The well was deleted."
+					}
+				}
+			}
+		},
+		"/v1/well": {
+			"get": {
+				"tags": [
+					"Well"
+				],
+				"summary": "Retrieves all wells",
+				"description": "Retrieves all well resources in a list.",
+				"operationId": "listWells",
+				"responses": {
+					"200": {
+						"description": "The list of wells was retrieved.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Well"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Well"
+				],
+				"summary": "Creates a well resource",
+				"description": "Sends a post request, validates input data, and saves the generated resource into the Scylla database.",
+				"operationId": "createWell",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/WellRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Well resource was created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Well"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "The request failed validation.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"example": "Field name: must not be null"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected error occurred",
+						"content": {
+							"application/json": {}
+						}
+					}
+				}
+			}
+		},
+		"/v1/add-component/{wellId}": {
+			"post": {
+				"tags": [
+					"Component"
+				],
+				"summary": "Associates a component with a well",
+				"description": "Associates a component to an existing well resource. Both component and well resources must exist, and are validated.",
+				"operationId": "addComponent",
+				"parameters": [
+					{
+						"name": "wellId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ComponentRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Association was created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Well"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "The request failed validation.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"example": "Field componentId: must not be null"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "The well or component was not found in the DB.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"example": "Well with id c5f2f64c-b02d-4635-8a34-c3d4cc2d955b not found in the database."
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Unexpected error occurred",
+						"content": {
+							"application/json": {}
+						}
+					}
+				}
+			}
+		},
+		"/v1/remove-component/well/{wellId}/component/{componentId}": {
+			"delete": {
+				"tags": [
+					"Component"
+				],
+				"summary": "Deletes an association between component and well",
+				"description": "Removes the link between well and a component with given UUID. The well must exist for the operation to succeed.",
+				"operationId": "removeComponent",
+				"parameters": [
+					{
+						"name": "wellId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "componentId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "The Tubing was deleted."
+					},
+					"404": {
+						"description": "The well or component was not found in the DB.",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"example": "Well with id c5f2f64c-b02d-4635-8a34-c3d4cc2d955b not found in the database."
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"Well": {
+				"type": "object",
+				"properties": {
+					"wellId": {
+						"type": "string",
+						"description": "The virtual well unique identifier",
+						"format": "uuid",
+						"example": "ccf9e52b-e2e4-45d8-8884-0721d3246a53"
+					},
+					"name": {
+						"type": "string",
+						"description": "The name of the virtual well resource",
+						"example": "Well #1"
+					},
+					"wellInfo": {
+						"type": "string",
+						"description": "Additional information for well resource",
+						"example": "Additional info"
+					},
+					"components": {
+						"type": "object",
+						"additionalProperties": {
+							"type": "string",
+							"description": "Map with corresponding component type and its unique identifier",
+							"enum": [
+								"choke",
+								"anm",
+								"tubing",
+								"anular"
+							]
+						},
+						"description": "Map with corresponding component type and its unique identifier"
+					},
+					"creationDateTime": {
+						"type": "string",
+						"description": "Resource creation date and time",
+						"format": "date-time"
+					}
+				},
+				"description": "Well resource"
+			},
+			"WellRequest": {
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "The name of the well resource"
+					},
+					"wellInfo": {
+						"type": "string",
+						"description": "Additional information for choke valve resource"
+					}
+				}
+			},
+			"ComponentRequest": {
+				"required": [
+					"componentId",
+					"type"
+				],
+				"type": "object",
+				"properties": {
+					"componentId": {
+						"type": "string",
+						"description": "Component unique identifier",
+						"format": "uuid",
+						"example": "ccf9e52b-e2e4-45d8-8884-0721d3246a53"
+					},
+					"type": {
+						"type": "string",
+						"enum": [
+							"choke",
+							"anm",
+							"tubing",
+							"anular"
+						]
+					}
+				}
+			}
+		}
+	}
+}
